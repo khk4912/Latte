@@ -1,0 +1,32 @@
+{
+  "guild_name": "test",
+  "module_settings": {
+    "utils": {
+      "enable_alarm": "False",
+      "enable_capturemsg": "True"
+    },
+    "fun": {
+      "enable_randomtxt": "True",
+      "enable_dice": "True",
+      "enable_suggestsongs": "True"
+    },
+    "management": {
+      "ch_ids": {
+        "autorole": [0],
+        "auth": 0
+      }
+    },
+    "minecraft": {
+      "server_type": "None",
+      "ch_ids": {
+        "patchnote": 0,
+        "on/off": 0
+      },
+      "server_address": "YOUR_SERVER_ADDRESS",
+      "server_resources": "YOUR_MODPACK_OR_LAUNCHER_DOWNLOAD_URL"
+    },
+    "music": {
+      "only_admin_can_skip": "False"
+    }
+  }
+}
