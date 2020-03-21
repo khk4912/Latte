@@ -13,7 +13,8 @@
     "management": {
       "ch_ids": {
         "autorole": [0],
-        "auth": 0
+        "auth": 0,
+        "log": 0
       }
     },
     "minecraft": {

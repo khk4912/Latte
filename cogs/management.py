@@ -19,7 +19,7 @@ class Management(commands.Cog):
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        # logger.info('[legacy_cogs] [management] Management 모듈이 준비되었습니다.')
+        # logger.info('[cogs] [management] Management 모듈이 준비되었습니다.')
         pass
 
     '''
@@ -142,7 +142,10 @@ class Management(commands.Cog):
         await member.kick(reason=reason)
         kick_embed = discord.Embed(title="**킥**", description=f"*{member.mention} 님이 킥 처리되었습니다.*")
         kick_embed.add_field(name="**사유**", value=f"*{reason}*", inline=False)
-        await self.bot.get_channel(self.bot.config['log_ch_id']).send(embed=kick_embed)
+
+        log_ch_id: int = self.bot.guild_configs[ctx.guild.name]['module_settings']['management']['ch_ids']['log']
+        if log_ch_id != 0:
+            await self.bot.get_channel(log_ch_id).send(embed=kick_embed)
 
     @commands.has_guild_permissions(administrator=True)
     @manage.command(name='차단',
@@ -151,7 +154,10 @@ class Management(commands.Cog):
         await member.ban(reason=reason)
         ban_embed = discord.Embed(title="**밴**", description=f"*{member.mention} 님이 밴 처리되었습니다.*")
         ban_embed.add_field(name="**사유**", value=f"*{reason}*", inline=False)
-        await self.bot.get_channel(self.bot.config['log_ch_id']).send(embed=ban_embed)
+
+        log_ch_id: int = self.bot.guild_configs[ctx.guild.name]['module_settings']['management']['ch_ids']['log']
+        if log_ch_id != 0:
+            await self.bot.get_channel(log_ch_id).send(embed=ban_embed)
 
     @commands.has_guild_permissions(administrator=True)
     @manage.command(name='차단해제',
@@ -160,7 +166,10 @@ class Management(commands.Cog):
         await member.unban(reason=reason)
         unban_embed = discord.Embed(title="**언밴**", description=f"*{member.mention} 님이 밴 해제 처리되었습니다.*")
         unban_embed.add_field(name="**사유**", value=f"*{reason}*", inline=False)
-        await self.bot.get_channel(self.bot.config['log_ch_id']).send(embed=unban_embed)
+
+        log_ch_id: int = self.bot.guild_configs[ctx.guild.name]['module_settings']['management']['ch_ids']['log']
+        if log_ch_id != 0:
+            await self.bot.get_channel(log_ch_id).send(embed=unban_embed)
 
     # @commands.has_guild_permissions(administrator=True)
     @commands.has_guild_permissions(manage_messages=True)
@@ -171,21 +180,26 @@ class Management(commands.Cog):
             await ctx.send(f'{amount} 는 너무 적습니다!')
             return
 
-        await ctx.channel.purge(limit=amount)
-        purge_embed = discord.Embed(title="채팅 청소기 MK.1", description="채팅창을 청소했습니다. 🌀")
+        del_msgs: list = await ctx.channel.purge(limit=amount)
+        count: int = len(del_msgs)
+        purge_embed = discord.Embed(title="채팅 청소기 MK.1 🌀", description=f"채팅창을 청소했습니다. {count}개의 메세지를 삭제했습니다.")
         await ctx.send(embed=purge_embed)
+
+        log_ch_id: int = self.bot.guild_configs[ctx.guild.name]['module_settings']['management']['ch_ids']['log']
+        if log_ch_id != 0:
+            await self.bot.get_channel(log_ch_id).send(embed=purge_embed)
 
     @commands.has_guild_permissions(administrator=True)
     @manage.command(name='투표',
                     description='투표를 생성합니다. 사용 양식은 아래와 같습니다 :\n'
-                                '__러스트봇 관리 투표 {제목}/[{선택1}/{선택2}/.../{선택9}]\n__'
+                                f'__{bot.command_prefix}관리 투표 제목, 설명, 항목1, 항목2, 항목3, ... , 항목9\n__'
                                 '제목은 반드시 입력하셔야 하며, 선택지는 두개 이상 9개 이하로 입력하셔야 합니다.')
-    async def create_vote(self, ctx: commands.Context, vote_content: str):
+    async def create_vote(self, ctx: commands.Context, *, vote_content: str):
         num_unicode_emoji: list = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']  # 1~9
-
         # Process vote_content to title(str), choices(list[str])
-        vote_datas: list = vote_content.translate(str.maketrans('', '', '{}')).split('/')
+        vote_datas: list = vote_content.split(',')
         title: str = vote_datas.pop(0)  # First content from vote_content must be the title
+        desc: str = vote_datas.pop(0)   # Second content(which now moved to first) must be the description.
         # logger.info(f'title = {title}')
         # logger.info(f'vote_datas = {vote_datas}')
         choices = vote_datas
@@ -204,7 +218,7 @@ class Management(commands.Cog):
             return
 
         # Create an Embed which contains informations of this vote:
-        vote_embed = discord.Embed(title=f"[투표] {title}", colour=discord.Colour.dark_red())
+        vote_embed = discord.Embed(title=f"[투표] {title}", description=desc, color=self.bot.latte_color)
 
         # Loops for add choices field in vote_embed:
         for num in range(choices_count):
@@ -222,5 +236,5 @@ class Management(commands.Cog):
 
 
 def setup(bot: LatteBot):
-    # logger.info('[legacy_cogs] [minecraft] Minecraft 모듈을 준비합니다.')
+    # logger.info('[cogs] [management] Management 모듈을 준비합니다.')
     bot.add_cog(Management(bot))
